@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Price Prediction — ML Dashboard</title>
+    <meta name="description" content="Predict real estate prices using Machine Learning — Linear Regression, Decision Tree, and Random Forest models.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+           CSS DESIGN SYSTEM — Dark luxury real-estate aesthetic
+           ═══════════════════════════════════════════════════════════════ */
+        :root {
+            --bg-primary: #0a0b0f;
+            --bg-card: #12141c;
+            --bg-card-hover: #181b26;
+            --bg-glass: rgba(18, 20, 28, 0.75);
+            --border: rgba(255,255,255,0.06);
+            --border-active: rgba(200,170,120,0.35);
+            --text-primary: #f0ede6;
+            --text-secondary: #8a8b94;
+            --text-muted: #55565f;
+            --accent-gold: #c8aa78;
+            --accent-gold-light: #e5d4b3;
+            --accent-emerald: #4ade80;
+            --accent-rose: #fb7185;
+            --accent-blue: #60a5fa;
+            --accent-violet: #a78bfa;
+            --gradient-gold: linear-gradient(135deg, #c8aa78 0%, #e5d4b3 50%, #c8aa78 100%);
+            --gradient-dark: linear-gradient(180deg, #0a0b0f 0%, #111320 100%);
+            --shadow-card: 0 4px 32px rgba(0,0,0,0.4);
+            --shadow-glow: 0 0 40px rgba(200,170,120,0.08);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'DM Sans', -apple-system, sans-serif;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(200,170,120,0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(74,222,128,0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-gold); border-radius: 3px; }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Header / Hero ── */
+        .hero {
+            padding: 60px 0 40px;
+            text-align: center;
+            position: relative;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(200,170,120,0.1);
+            border: 1px solid rgba(200,170,120,0.2);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            animation: fadeDown 0.8s ease;
+        }
+        .hero-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent-emerald);
+            animation: pulse-dot 2s infinite;
+        }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 3.6rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            animation: fadeDown 0.8s ease 0.1s both;
+        }
+        .hero h1 .gold { color: var(--accent-gold); }
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 620px;
+            margin: 0 auto;
+            animation: fadeDown 0.8s ease 0.2s both;
+        }
+
+        /* ── Navigation Tabs ── */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 32px 0 40px;
+            padding: 5px;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid var(--border);
+            animation: fadeDown 0.8s ease 0.3s both;
+        }
+        .nav-tab {
+            padding: 10px 22px;
+            border-radius: 50px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .nav-tab:hover { color: var(--text-primary); }
+        .nav-tab.active {
+            background: var(--accent-gold);
+            color: #0a0b0f;
+            font-weight: 700;
+        }
+
+        /* ── Sections ── */
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 0.95rem;
+        }
+
+        /* ── Stat Cards Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--gradient-gold);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .stat-card:hover { border-color: var(--border-active); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--accent-gold-light);
+        }
+        .stat-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ── Model Comparison Cards ── */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            transition: var(--transition);
+            position: relative;
+        }
+        .model-card.best {
+            border-color: var(--accent-gold);
+            box-shadow: var(--shadow-glow);
+        }
+        .model-card.best::after {
+            content: '🏆 BEST';
+            position: absolute;
+            top: 16px; right: 16px;
+            background: var(--gradient-gold);
+            color: #0a0b0f;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+        }
+        .model-card:hover { border-color: var(--border-active); transform: translateY(-3px); }
+        .model-name {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .metric-row:last-child { border: none; }
+        .metric-label { color: var(--text-secondary); font-size: 0.85rem; }
+        .metric-val { font-weight: 700; font-size: 1rem; }
+        .metric-val.good { color: var(--accent-emerald); }
+        .metric-val.warn { color: var(--accent-gold); }
+        .metric-val.bad  { color: var(--accent-rose); }
+
+        /* R² Bar */
+        .r2-bar-wrap {
+            margin-top: 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .r2-bar {
+            height: 100%;
+            border-radius: 8px;
+            background: var(--gradient-gold);
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Visualization Grid ── */
+        .viz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .viz-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .viz-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+        .viz-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .viz-card img.loaded { opacity: 1; }
+        .viz-caption {
+            padding: 16px 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+        }
+        .viz-caption strong { color: var(--text-primary); }
+
+        /* ── Prediction Form ── */
+        .predict-section {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+        .form-group input, .form-group select {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(200,170,120,0.12);
+        }
+        .form-group input::placeholder { color: var(--text-muted); }
+        .form-hint {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .btn-predict {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gradient-gold);
+            color: #0a0b0f;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 40px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 0.5px;
+        }
+        .btn-predict:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,170,120,0.3); }
+        .btn-predict:active { transform: translateY(0); }
+        .btn-predict.loading { opacity: 0.7; pointer-events: none; }
+
+        /* Prediction Results */
+        .pred-results {
+            display: none;
+            margin-top: 32px;
+            animation: fadeIn 0.5s ease;
+        }
+        .pred-results.show { display: block; }
+        .pred-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .pred-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .pred-card.highlight {
+            border-color: var(--accent-gold);
+            box-shadow: var(--shadow-glow);
+        }
+        .pred-card .pred-model {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        .pred-card .pred-price {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-gold-light);
+        }
+        .pred-card .pred-tag {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 50px;
+            background: rgba(200,170,120,0.15);
+            color: var(--accent-gold);
+        }
+
+        /* ── Feature Importance Bars ── */
+        .feat-bars { margin-bottom: 40px; }
+        .feat-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+        .feat-bar-label {
+            min-width: 220px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+        .feat-bar-track {
+            flex: 1;
+            height: 24px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .feat-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: var(--gradient-gold);
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .feat-bar-val {
+            min-width: 55px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent-gold-light);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        .footer a { color: var(--accent-gold); text-decoration: none; }
+
+        /* ── Animations ── */
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .anim-up {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .anim-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .viz-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .nav-tabs { flex-wrap: wrap; border-radius: var(--radius); }
+            .feat-bar-label { min-width: 130px; font-size: 0.75rem; }
+            .container { padding: 0 16px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .models-grid { grid-template-columns: 1fr; }
+            .pred-cards { grid-template-columns: 1fr; }
+        }
+
+        /* ── Loading Skeleton ── */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius);
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ═══════════ HERO ═══════════ -->
+    <header class="hero">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            ML-Powered Predictions
+        </div>
+        <h1>Real Estate <span class="gold">Price Prediction</span></h1>
+        <p>Three machine learning models trained on 14,000+ Indian housing records to deliver accurate, data-driven property valuations.</p>
+    </header>
+
+    <!-- ═══════════ NAV TABS ═══════════ -->
+    <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-section="overview" id="tab-overview">Overview</button>
+        <button class="nav-tab" data-section="models" id="tab-models">Models</button>
+        <button class="nav-tab" data-section="visualizations" id="tab-visualizations">Visualizations</button>
+        <button class="nav-tab" data-section="predict" id="tab-predict">Predict</button>
+    </nav>
+
+    <!-- ═══════════ OVERVIEW SECTION ═══════════ -->
+    <section class="section active" id="sec-overview">
+        <h2 class="section-title">Dataset Overview</h2>
+        <p class="section-subtitle">Key statistics from the House Price India dataset after preprocessing</p>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card skeleton" style="height:110px"></div>
+            <div class="stat-card skeleton" style="height:110px"></div>
+            <div class="stat-card skeleton" style="height:110px"></div>
+            <div class="stat-card skeleton" style="height:110px"></div>
+            <div class="stat-card skeleton" style="height:110px"></div>
+            <div class="stat-card skeleton" style="height:110px"></div>
+        </div>
+
+        <h2 class="section-title" style="margin-top:48px">Feature Importance</h2>
+        <p class="section-subtitle">Top features influencing house price — determined by the Random Forest model</p>
+        <div class="feat-bars" id="featBars"></div>
+    </section>
+
+    <!-- ═══════════ MODELS SECTION ═══════════ -->
+    <section class="section" id="sec-models">
+        <h2 class="section-title">Model Comparison</h2>
+        <p class="section-subtitle">Performance metrics for each trained algorithm on the 20% hold-out test set</p>
+        <div class="models-grid" id="modelsGrid"></div>
+
+        <h2 class="section-title" style="margin-top:48px">Performance Charts</h2>
+        <p class="section-subtitle">Side-by-side metric comparison and actual vs predicted scatter plots</p>
+        <div class="viz-grid">
+            <div class="viz-card anim-up">
+                <img data-src="/plots/06_model_comparison.png" alt="Model Comparison">
+                <div class="viz-caption"><strong>Metric Comparison</strong> — RMSE, R², and MAE across all three models</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/07_actual_vs_predicted.png" alt="Actual vs Predicted">
+                <div class="viz-caption"><strong>Actual vs Predicted</strong> — Scatter plot showing prediction accuracy</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/08_residuals.png" alt="Residuals">
+                <div class="viz-caption"><strong>Residual Distribution</strong> — Error distribution for each model</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/10_learning_curve.png" alt="Learning Curve">
+                <div class="viz-caption"><strong>Learning Curve</strong> — Training vs validation R² as data grows</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ VISUALIZATIONS SECTION ═══════════ -->
+    <section class="section" id="sec-visualizations">
+        <h2 class="section-title">Exploratory Data Analysis</h2>
+        <p class="section-subtitle">Visual exploration of the dataset — distributions, correlations, and relationships</p>
+        <div class="viz-grid">
+            <div class="viz-card anim-up">
+                <img data-src="/plots/01_price_distribution.png" alt="Price Distribution">
+                <div class="viz-caption"><strong>Price Distribution</strong> — Original and log-transformed histograms</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/02_correlation_heatmap.png" alt="Correlation Heatmap">
+                <div class="viz-caption"><strong>Correlation Heatmap</strong> — Pairwise feature correlations</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/03_top_features_correlation.png" alt="Top Features">
+                <div class="viz-caption"><strong>Top Correlated Features</strong> — Features most correlated with price</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/04_scatter_top_features.png" alt="Scatter Plots">
+                <div class="viz-caption"><strong>Feature Scatter Plots</strong> — Top 4 features vs house price</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/05_boxplots.png" alt="Box Plots">
+                <div class="viz-caption"><strong>Box Plots</strong> — Price distribution by bedrooms, floors, and condition</div>
+            </div>
+            <div class="viz-card anim-up">
+                <img data-src="/plots/09_feature_importance.png" alt="Feature Importance">
+                <div class="viz-caption"><strong>Random Forest Importance</strong> — Top 15 feature importances from RF</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ PREDICT SECTION ═══════════ -->
+    <section class="section" id="sec-predict">
+        <div class="predict-section">
+            <h2 class="section-title">Predict House Price</h2>
+            <p class="section-subtitle">Enter property details below — all three models will generate predictions simultaneously</p>
+
+            <form id="predictForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="inp-bedrooms">Bedrooms</label>
+                        <input type="number" id="inp-bedrooms" placeholder="e.g. 3" min="1" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-bathrooms">Bathrooms</label>
+                        <input type="number" id="inp-bathrooms" placeholder="e.g. 2" min="1" max="8" step="0.25" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-living-area">Living Area (sqft)</label>
+                        <input type="number" id="inp-living-area" placeholder="e.g. 2000" min="370" max="13540" value="2000">
+                        <span class="form-hint">Range: 370 – 13,540</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-lot-area">Lot Area (sqft)</label>
+                        <input type="number" id="inp-lot-area" placeholder="e.g. 7600" min="520" value="7600">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-floors">Floors</label>
+                        <input type="number" id="inp-floors" placeholder="e.g. 1.5" min="1" max="3.5" step="0.5" value="1.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-grade">Grade (4-13)</label>
+                        <input type="number" id="inp-grade" placeholder="e.g. 7" min="4" max="13" value="7">
+                        <span class="form-hint">Higher = better construction quality</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-condition">Condition (1-5)</label>
+                        <input type="number" id="inp-condition" placeholder="e.g. 3" min="1" max="5" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-built-year">Built Year</label>
+                        <input type="number" id="inp-built-year" placeholder="e.g. 1990" min="1900" max="2015" value="1990">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-waterfront">Waterfront</label>
+                        <select id="inp-waterfront">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-views">Views (0-4)</label>
+                        <input type="number" id="inp-views" placeholder="e.g. 0" min="0" max="4" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-schools">Schools Nearby</label>
+                        <input type="number" id="inp-schools" placeholder="e.g. 2" min="1" max="3" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="inp-airport-dist">Distance to Airport (km)</label>
+                        <input type="number" id="inp-airport-dist" placeholder="e.g. 65" min="50" max="80" value="65">
+                    </div>
+                </div>
+
+                <div style="text-align:center; margin-top:8px;">
+                    <button type="submit" class="btn-predict" id="btnPredict">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Predict Price
+                    </button>
+                </div>
+            </form>
+
+            <div class="pred-results" id="predResults">
+                <h3 style="text-align:center; margin-bottom:20px; color:var(--text-secondary); font-size:0.85rem; text-transform:uppercase; letter-spacing:1.5px;">Predicted Prices</h3>
+                <div class="pred-cards" id="predCards"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer class="footer">
+        <p>Real Estate Price Prediction — R&I Assignment 1 &nbsp;|&nbsp; Machine Learning Models &nbsp;|&nbsp; Faculty: Dr. Nirali Nanavati</p>
+    </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DASHBOARD LOGIC
+   ═══════════════════════════════════════════════════════════════════ */
+
+// ── Tab Navigation ──
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('sec-' + tab.dataset.section).classList.add('active');
+        lazyLoadImages();
+        animateOnScroll();
+    });
+});
+
+// ── Lazy load images ──
+function lazyLoadImages() {
+    document.querySelectorAll('img[data-src]').forEach(img => {
+        if (img.closest('.section.active') || img.closest('.section') === null) {
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+            img.onload = () => img.classList.add('loaded');
+        }
+    });
+}
+
+// ── Scroll animation ──
+function animateOnScroll() {
+    const els = document.querySelectorAll('.anim-up');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('visible'), i * 80);
+                observer.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    els.forEach(el => {
+        if (!el.classList.contains('visible')) observer.observe(el);
+    });
+}
+
+// ── Format currency ──
+function fmt(n) {
+    if (n >= 1e7) return '₹' + (n / 1e7).toFixed(2) + ' Cr';
+    if (n >= 1e5) return '₹' + (n / 1e5).toFixed(2) + ' L';
+    return '₹' + n.toLocaleString('en-IN');
+}
+function fmtShort(n) {
+    return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+// ── Load dashboard data ──
+async function loadDashboard() {
+    try {
+        const res = await fetch('/api/dashboard-data');
+        const data = await res.json();
+        renderStats(data.dataset_info);
+        renderModels(data.model_metrics);
+        renderFeatureImportance(data.feature_importances);
+        lazyLoadImages();
+        animateOnScroll();
+    } catch (err) {
+        console.error('Failed to load dashboard:', err);
+    }
+}
+
+function renderStats(info) {
+    const grid = document.getElementById('statsGrid');
+    grid.innerHTML = `
+        <div class="stat-card anim-up">
+            <div class="stat-label">Total Records</div>
+            <div class="stat-value">${fmtShort(info.clean_rows)}</div>
+            <div class="stat-sub">After preprocessing</div>
+        </div>
+        <div class="stat-card anim-up">
+            <div class="stat-label">Features</div>
+            <div class="stat-value">${info.num_features}</div>
+            <div class="stat-sub">Including engineered</div>
+        </div>
+        <div class="stat-card anim-up">
+            <div class="stat-label">Min Price</div>
+            <div class="stat-value">${fmt(info.price_min)}</div>
+            <div class="stat-sub">Lowest in dataset</div>
+        </div>
+        <div class="stat-card anim-up">
+            <div class="stat-label">Max Price</div>
+            <div class="stat-value">${fmt(info.price_max)}</div>
+            <div class="stat-sub">Highest in dataset</div>
+        </div>
+        <div class="stat-card anim-up">
+            <div class="stat-label">Mean Price</div>
+            <div class="stat-value">${fmt(info.price_mean)}</div>
+            <div class="stat-sub">Average selling price</div>
+        </div>
+        <div class="stat-card anim-up">
+            <div class="stat-label">Median Price</div>
+            <div class="stat-value">${fmt(info.price_median)}</div>
+            <div class="stat-sub">Middle value</div>
+        </div>
+    `;
+    setTimeout(animateOnScroll, 50);
+}
+
+function renderModels(metrics) {
+    const grid = document.getElementById('modelsGrid');
+    const names = Object.keys(metrics);
+    const bestModel = names.reduce((a, b) => metrics[a].R2 > metrics[b].R2 ? a : b);
+    const icons = {'Linear Regression': '📈', 'Decision Tree': '🌳', 'Random Forest': '🌲'};
+
+    grid.innerHTML = names.map(name => {
+        const m = metrics[name];
+        const isBest = name === bestModel;
+        return `
+        <div class="model-card anim-up ${isBest ? 'best' : ''}">
+            <div class="model-name">${icons[name] || '🤖'} ${name}</div>
+            <div class="metric-row">
+                <span class="metric-label">R² Score</span>
+                <span class="metric-val ${m.R2 > 0.8 ? 'good' : m.R2 > 0.6 ? 'warn' : 'bad'}">${m.R2.toFixed(4)}</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">RMSE</span>
+                <span class="metric-val">${fmtShort(Math.round(m.RMSE))}</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">MAE</span>
+                <span class="metric-val">${fmtShort(Math.round(m.MAE))}</span>
+            </div>
+            <div class="r2-bar-wrap">
+                <div class="r2-bar" style="width:0%" data-width="${(m.R2 * 100).toFixed(1)}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    setTimeout(() => {
+        document.querySelectorAll('.r2-bar').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+        });
+        animateOnScroll();
+    }, 100);
+}
+
+function renderFeatureImportance(features) {
+    const container = document.getElementById('featBars');
+    if (!features || !features.length) return;
+    const maxVal = features[0].importance;
+
+    container.innerHTML = features.map(f => `
+        <div class="feat-bar-row anim-up">
+            <span class="feat-bar-label">${f.name}</span>
+            <div class="feat-bar-track">
+                <div class="feat-bar-fill" style="width:0%" data-width="${(f.importance / maxVal * 100).toFixed(1)}%"></div>
+            </div>
+            <span class="feat-bar-val">${f.importance.toFixed(4)}</span>
+        </div>
+    `).join('');
+
+    setTimeout(() => {
+        document.querySelectorAll('.feat-bar-fill').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+        });
+        animateOnScroll();
+    }, 200);
+}
+
+// ── Prediction Form ──
+document.getElementById('predictForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnPredict');
+    btn.classList.add('loading');
+    btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4m-3.93 7.07l-2.83-2.83M7.76 7.76L4.93 4.93"/></svg> Predicting…';
+
+    const payload = {
+        "number of bedrooms":    +document.getElementById('inp-bedrooms').value,
+        "number of bathrooms":   +document.getElementById('inp-bathrooms').value,
+        "living area":           +document.getElementById('inp-living-area').value,
+        "lot area":              +document.getElementById('inp-lot-area').value,
+        "number of floors":      +document.getElementById('inp-floors').value,
+        "grade of the house":    +document.getElementById('inp-grade').value,
+        "condition of the house":+document.getElementById('inp-condition').value,
+        "Built Year":            +document.getElementById('inp-built-year').value,
+        "waterfront present":    +document.getElementById('inp-waterfront').value,
+        "number of views":       +document.getElementById('inp-views').value,
+        "Number of schools nearby": +document.getElementById('inp-schools').value,
+        "Distance from the airport":+document.getElementById('inp-airport-dist').value,
+    };
+
+    try {
+        const res  = await fetch('/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        renderPredictions(data.predictions);
+    } catch (err) {
+        console.error(err);
+        alert('Prediction failed. Make sure the Flask server is running.');
+    } finally {
+        btn.classList.remove('loading');
+        btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Predict Price';
+    }
+});
+
+function renderPredictions(preds) {
+    const container = document.getElementById('predCards');
+    const resultBox = document.getElementById('predResults');
+    const names = Object.keys(preds);
+    const bestVal = Math.max(...Object.values(preds));
+    const icons = {'Linear Regression': '📈', 'Decision Tree': '🌳', 'Random Forest': '🌲'};
+
+    container.innerHTML = names.map(name => {
+        const isRF = name === 'Random Forest';
+        return `
+        <div class="pred-card ${isRF ? 'highlight' : ''}">
+            <div class="pred-model">${icons[name] || ''} ${name}</div>
+            <div class="pred-price">${fmt(preds[name])}</div>
+            ${isRF ? '<div class="pred-tag">🏆 Best Model</div>' : ''}
+        </div>`;
+    }).join('');
+
+    resultBox.classList.add('show');
+    resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── Spinner keyframe ──
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+// ── Init ──
+loadDashboard();
+</script>
+</body>
+</html>
