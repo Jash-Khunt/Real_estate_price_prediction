@@ -57,10 +57,8 @@ After running, open your browser and navigate to: **`http://127.0.0.1:5050`**
 ├── templates/
 │   └── index.html              # Frontend dashboard (HTML/CSS/JS)
 ├── output_plots/               # Generated visualization plots
-│   ├── 01_price_distribution.png
-│   ├── 02_correlation_heatmap.png
-│   ├── ... (and others)
-│   └── 09_feature_importance.png
+├── requirements.txt            # Python dependencies for deployment
+├── Procfile                    # Deployment configuration
 └── README.md                   # Project documentation
 ```
 
@@ -75,3 +73,34 @@ After running, open your browser and navigate to: **`http://127.0.0.1:5050`**
   - *Answer*: Yes, nonlinear models like Random Forest capture complex patterns that basic statistical methods miss, providing much higher reliability.
 - **RQ4**: Impact of preprocessing?
   - *Answer*: Removing extreme outliers (1st-99th percentile) and engineering features like `house_age` and `total_area` significantly boosted model stability.
+
+---
+
+## 🚀 Deployment Guide (Render)
+
+To deploy this project to the web using **Render**, follow these steps:
+
+### 1. Push to GitHub
+Ensure your latest code and configuration files are pushed to your repository:
+```bash
+git add .
+git commit -m "Prepare for deployment"
+git push origin main
+```
+
+### 2. Create a New Web Service on Render
+1.  Log in to [Render.com](https://render.com).
+2.  Click **New +** and select **Web Service**.
+3.  Connect your GitHub repository: `Real_estate_price_prediction`.
+4.  Configure the service:
+    - **Name**: `real-estate-prediction-dashboard`
+    - **Environment**: `Python 3`
+    - **Build Command**: `pip install -r requirements.txt`
+    - **Start Command**: `gunicorn app:app`
+5.  Click **Create Web Service**.
+
+---
+
+## 👤 Submission Details
+- **Faculty**: Dr. Nirali Nanavati
+- **Course**: R&I Assignment 1
