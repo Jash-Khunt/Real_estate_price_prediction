@@ -48,13 +48,13 @@ We proposed a comparative study between three distinct algorithms to find the mo
 ### 3.1 Random Forest Regressor (Final Solution)
 Based on our experimental Phase, the **Random Forest Regressor** was selected as the final solution due to its superior handling of non-linear data and robustness against overfitting.
 
-![Model Comparison](file:///Users/apple/Desktop/College/PDS/output_plots/06_model_comparison.png)
+![Model Comparison](output_plots/06_model_comparison.png)
 *Figure 1: Comparison of R² Score and Error Metrics across proposed models.*
 
 ### 3.2 Proposed Features Importance
 The primary strength of the proposed Random Forest model is its ability to rank feature significance. Our analysis shows that **Grade of the house** and **Lattitude** (location) are the most dominant factors in the proposed solution.
 
-![Feature Importance](file:///Users/apple/Desktop/College/PDS/output_plots/09_feature_importance.png)
+![Feature Importance](output_plots/09_feature_importance.png)
 *Figure 2: Top features influencing the price prediction in the Random Forest model.*
 
 ---
@@ -69,7 +69,7 @@ The primary strength of the proposed Random Forest model is its ability to rank 
 ### 4.2 Proposed Web Dashboard
 The solution includes a live dashboard for real-time interaction.
 
-![Dashboard Preview](file:///Users/apple/Desktop/College/PDS/output_plots/07_actual_vs_predicted.png)
+![Dashboard Preview](output_plots/07_actual_vs_predicted.png)
 *Figure 3: Accuracy analysis (Actual vs Predicted Prices) showing the model's reliability.*
 
 ---

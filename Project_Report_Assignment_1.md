@@ -54,13 +54,13 @@ The research follows a structured experimental approach. Below are the insights 
 ### Phase I: Data Collection & Initial Distribution
 We analyzed the price distribution to understand the market spread. The data showed a distinct right-skew, common in real estate markets.
 
-![Price Distribution](file:///Users/apple/Desktop/College/PDS/output_plots/01_price_distribution.png)
+![Price Distribution](output_plots/01_price_distribution.png)
 *Figure 1: Original and Log-transformed Price Distributions indicating data characteristics.*
 
 ### Phase II: Feature Correlation Analysis
 To identify key influencing factors (RQ2), we used a Correlation Heatmap. We found that features like `living_area`, `grade_of_the_house`, and `total_area` have the most significant positive impact on price.
 
-![Correlation Heatmap](file:///Users/apple/Desktop/College/PDS/output_plots/02_correlation_heatmap.png)
+![Correlation Heatmap](output_plots/02_correlation_heatmap.png)
 *Figure 2: Heatmap showing strength of relationships between features.*
 
 ### Phase III: Model Training & Evaluation (RQ1 & RQ3)
