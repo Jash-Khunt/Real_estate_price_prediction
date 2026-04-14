@@ -229,8 +229,11 @@ def predict():
 def serve_plot(filename):
     return send_from_directory(PLOT_DIR, filename)
 
+# ── Initialization ──
+# Train all models on startup (Runs once when server loads)
+train_all_models()
+
 if __name__ == "__main__":
-    train_all_models()
     # For local testing, use port 5050; for production, binding to PORT is handled by Gunicorn or the platform
     port = int(os.environ.get("PORT", 5050))
     app.run(host="0.0.0.0", port=port)
