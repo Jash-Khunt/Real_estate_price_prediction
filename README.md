@@ -98,9 +98,3 @@ git push origin main
     - **Build Command**: `pip install -r requirements.txt`
     - **Start Command**: `gunicorn app:app`
 5.  Click **Create Web Service**.
-
----
-
-## 👤 Submission Details
-- **Faculty**: Dr. Nirali Nanavati
-- **Course**: R&I Assignment 1

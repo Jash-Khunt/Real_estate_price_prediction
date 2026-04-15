@@ -1,12 +1,6 @@
 # R&I Assignment 1: Research Proposal & Methodology
 ## Real Estate Price Prediction using Machine Learning Techniques
 
-**Team Details:**
-- **Enrollment No:** [Insert Name]
-- **Enrollment No:** [Insert Name]
-- **Team Facilitator:** [Insert Name]
-- **Faculty:** Dr. Nirali Nanavati
-
 ---
 
 ## 1. Project Definition
